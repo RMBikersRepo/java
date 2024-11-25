@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analizador Léxico de Encriptación</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        #resultadoTokens ul {
+            list-style-type: none;
+        }
+        .token {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Analizador Léxico de Encriptación</h1>
+    
+    <!-- Área para ingresar el mensaje -->
+    <textarea id="mensajeInput" rows="10" cols="50"></textarea><br><br>
+    
+    <!-- Botón para enviar el mensaje al servidor -->
+    <button id="enviarBtn">Enviar Mensaje</button>
+
+    <!-- Área para mostrar el mensaje encriptado -->
+    <h2>Mensaje Encriptado:</h2>
+    <p id="mensajeEncriptado"></p>
+
+    <!-- Área para mostrar los tokens -->
+    <div id="resultadoTokens">
+        <h2>Tokens Generados:</h2>
+        <ul id="tokensList"></ul>
+    </div>
+
+    <script>
+        const socket = io();
+        const enviarBtn = document.getElementById('enviarBtn');
+        const mensajeInput = document.getElementById('mensajeInput');
+        const mensajeEncriptado = document.getElementById('mensajeEncriptado');
+        const tokensList = document.getElementById('tokensList');
+
+        // Evento para enviar el mensaje al servidor cuando se hace clic en el botón
+        enviarBtn.addEventListener('click', () => {
+            const mensaje = mensajeInput.value;
+
+            // Enviar el mensaje al servidor para encriptarlo
+            socket.emit('enviarMensaje', { mensaje });
+        });
+
+        // Escuchar la respuesta del servidor con el mensaje encriptado y los tokens generados
+        socket.on('mensajeEncriptado', (data) => {
+            console.log('Mensaje encriptado:', data.mensajeEncriptado);
+            mensajeEncriptado.textContent = data.mensajeEncriptado;
+
+            // Mostrar los tokens generados
+            tokensList.innerHTML = ''; // Limpiar lista de tokens
+            data.tokens.forEach(token => {
+                const li = document.createElement('li');
+                li.classList.add('token');
+                li.textContent = `${token.tipo}: ${token.valor}`;
+                tokensList.appendChild(li);
+            });
+        });
+    </script>
+</body>
+</html>
